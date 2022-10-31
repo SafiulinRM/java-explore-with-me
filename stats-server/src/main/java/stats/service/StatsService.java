@@ -31,10 +31,9 @@ public class StatsService {
         List<ViewStats> stats;
         LocalDateTime formattedStart = LocalDateTime.parse(start, FORMATTER);
         LocalDateTime formattedEnd = LocalDateTime.parse(end, FORMATTER);
-        if(unique.equals(true)){
+        if (unique.equals(true)) {
             stats = hitRepository.getStatsUnique(formattedStart, formattedEnd, uris);
-        }
-        else {
+        } else {
             stats = hitRepository.getStats(formattedStart, formattedEnd, uris);
         }
         return stats;

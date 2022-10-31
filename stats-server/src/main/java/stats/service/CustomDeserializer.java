@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CustomDeserializer extends StdDeserializer<String> {
@@ -27,5 +26,4 @@ public class CustomDeserializer extends StdDeserializer<String> {
         }
         return null;
     }
-
 }
