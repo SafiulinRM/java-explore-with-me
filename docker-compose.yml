@@ -2,7 +2,7 @@ version: '3.8'
 services:
   stats-server:
     build: stats-server
-    container_name: exploreWithMe-server
+    container_name: stats-server
     ports:
       - "9090:9090"
     depends_on:
@@ -24,7 +24,7 @@ services:
 
   ewm-service:
     build: ewm-service
-    container_name: exploreWithMe-service
+    container_name: ewm-service
     ports:
       - "8080:8080"
     depends_on:
@@ -33,6 +33,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/service
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
+      - STATS_SERVER_URL=http://stats-server:9090
+      - EWM_SERVICE_URL=http://ewm-service:8080
 
   ewm-db:
     image: postgres:14-alpine
