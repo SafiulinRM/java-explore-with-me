@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Slf4j
@@ -27,15 +28,16 @@ public class EventController {
                                          @RequestParam(required = false) String sort,
                                          @RequestParam(required = false, defaultValue = "0") int from,
                                          @RequestParam(required = false, defaultValue = "10") int size,
-                                         EventUserFilter filter) {
-        var events = eventService.getEvents(filter);
+                                         EventUserFilter filter,
+                                         HttpServletRequest request) {
+        var events = eventService.getEvents(filter, request);
         log.info("События найдены");
         return events;
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEvent(@PathVariable Long id) {
-        EventFullDto eventFullDto = eventService.getEvent(id);
+    public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest request) {
+        EventFullDto eventFullDto = eventService.getEvent(id, request);
         log.info("Событие найдено");
         return eventFullDto;
     }
