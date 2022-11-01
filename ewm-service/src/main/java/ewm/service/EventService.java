@@ -1,8 +1,10 @@
 package ewm.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import ewm.client.EventClient;
 import ewm.dto.LocationShort;
 import ewm.dto.event.*;
+import ewm.dto.stats.EndpointHit;
 import ewm.exception.EventDateException;
 import ewm.exception.NotFoundException;
 import ewm.exception.StateException;
@@ -17,6 +19,7 @@ import ewm.repo.UserRepository;
 import ewm.status.EventState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,17 +47,21 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final EventClient eventClient;
 
-    public List<EventShortDto> getEvents(EventUserFilter filter) {
+    @Value("ewm-service.url")
+    private String baseUri;
+
+    public List<EventShortDto> getEvents(EventUserFilter filter, HttpServletRequest request) {
+        setViewsOfEvents(filter, request);
         Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
         List result = new ArrayList();
         events.forEach(result::add);
         return toEventsFullDto(result);
     }
 
-    public EventFullDto getEvent(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Event not found " + id));
+    public EventFullDto getEvent(Long id, HttpServletRequest request) {
+        Event event = setViewOfEvent(id, request);
         return toEventFullDto(event);
     }
 
@@ -159,7 +167,7 @@ public class EventService {
         } else if (filter.getSort().equals("VIEWS")) {
             filter.setSort("views");
         }
-        Sort sort = Sort.by(Sort.Direction.ASC, filter.getSort());
+        Sort sort = Sort.by(Sort.Direction.DESC, filter.getSort());
         int page = filter.getFrom() / filter.getSize();
         return PageRequest.of(page, filter.getSize(), sort);
     }
@@ -290,5 +298,37 @@ public class EventService {
         if (initiatorId != userId) {
             throw new UserEventException("User " + userId + " not initiator of event " + initiatorId);
         }
+    }
+
+    private Long getStats(HttpServletRequest request) {
+        var stats = eventClient.getStats(List.of(request.getRequestURI()));
+        return stats.getBody()[0].getHits();
+    }
+
+    private void postHit(HttpServletRequest request) {
+        EndpointHit endpointHit = new EndpointHit("ewm-service",
+                request.getRequestURI(),
+                request.getRemoteAddr());
+        eventClient.postHit(endpointHit);
+    }
+
+    @Transactional
+    protected void setViewsOfEvents(EventUserFilter filter, HttpServletRequest request) {
+        Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
+        postHit(request);
+        for (Event event : events) {
+            Long views = eventClient.getStats(List.of(baseUri + "/events/" + event.getId()))
+                    .getBody()[0].getHits();
+            event.setViews(views);
+        }
+    }
+
+    @Transactional
+    protected Event setViewOfEvent(Long id, HttpServletRequest request) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Event not found " + id));
+        postHit(request);
+        event.setViews(getStats(request));
+        return event;
     }
 }
