@@ -1,43 +1,55 @@
 package ewm.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import ewm.dto.stats.EndpointHit;
+import ewm.dto.stats.ViewStats;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
-public class EventClient extends BaseClient {
+public class EventClient {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Autowired
-    public EventClient(@Value("${ewm-service.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+    @Value("stats-server.url")
+    private String baseUri;
+
+    public void postHit(EndpointHit endpointHit) {
+        var entity = new HttpEntity<>(endpointHit);
+        var restTemplate = new RestTemplate();
+        restTemplate.exchange((baseUri + "/hit"),
+                HttpMethod.POST,
+                entity,
+                Object.class);
     }
 
-   /*  public void postHit(EndpointHit endpointHit) {
-        post("/hit", endpointHit);
+    public ResponseEntity<ViewStats[]> getStats(List<String> uris) {
+        var entity = new HttpEntity<>(null);
+        String start = LocalDateTime.now().minusDays(7).format(FORMATTER);
+        start = URLEncoder.encode(start, StandardCharsets.UTF_8);
+        String end = LocalDateTime.now().format(FORMATTER);
+        end = URLEncoder.encode(end, StandardCharsets.UTF_8);
+        var urisBuilder = new StringBuilder("uris=");
+        int count = 0;
+        for (String uri : uris) {
+            count++;
+            if (count == uris.size())
+                urisBuilder.append(uri);
+            else
+                urisBuilder.append(uri).append("uris=");
+        }
+        var restTemplate = new RestTemplate();
+        return restTemplate.exchange((baseUri + "/stats?start=" + start +
+                        "&end=" + end + "&unique=true&" + urisBuilder),
+                HttpMethod.GET,
+                entity,
+                ViewStats[].class);
     }
-
-    public List<ViewStats> getStats(String start,
-                                    String end,
-                                    List<String> uris,
-                                    Boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
-        );
-        ResponseEntity<Object> responseEntity = get("/stats", parameters);
-        Gson gson = new Gson();
-
-         List<ViewStats> objects = gson.fromJson(gson.toJson(responseEntity.getBody()), List<ViewStats>.class);
-        return get("/stats", parameters); */
-    }
+}
 
