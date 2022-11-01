@@ -21,7 +21,10 @@ public class EventClient {
     private String baseUri;
 
     public void postHit(EndpointHit endpointHit) {
-        var entity = new HttpEntity<>(endpointHit);
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        var entity = new HttpEntity<>(endpointHit, headers);
         var restTemplate = new RestTemplate();
         restTemplate.exchange((baseUri + "/hit"),
                 HttpMethod.POST,
@@ -30,7 +33,10 @@ public class EventClient {
     }
 
     public ResponseEntity<ViewStats[]> getStats(List<String> uris) {
-        var entity = new HttpEntity<>(null);
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        var entity = new HttpEntity<>(null, headers);
         String start = LocalDateTime.now().minusDays(7).format(FORMATTER);
         start = URLEncoder.encode(start, StandardCharsets.UTF_8);
         String end = LocalDateTime.now().format(FORMATTER);
