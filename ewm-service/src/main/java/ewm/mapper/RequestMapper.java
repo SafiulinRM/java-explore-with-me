@@ -11,7 +11,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RequestMapper {
+public final class RequestMapper {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static ParticipationRequestDto toParticipationRequestDto(Request request) {

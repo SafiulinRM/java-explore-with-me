@@ -12,7 +12,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CategoryMapper {
+public final class CategoryMapper {
     public static CategoryDto toCategoryDto(Category category) {
         return new CategoryDto(category.getId(), category.getName());
     }

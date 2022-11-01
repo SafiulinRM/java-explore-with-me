@@ -13,7 +13,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserMapper {
+public final class UserMapper {
     public static UserDto toUserDto(User user) {
         return new UserDto(
                 user.getEmail(),

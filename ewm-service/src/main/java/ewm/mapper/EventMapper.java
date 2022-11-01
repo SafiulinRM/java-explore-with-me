@@ -18,7 +18,7 @@ import static ewm.mapper.CategoryMapper.toCategoryDto;
 import static ewm.mapper.UserMapper.toUserShortDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class EventMapper {
+public final class EventMapper {
     public static EventShortDto toEventShortDto(Event event) {
         return new EventShortDto(
                 event.getAnnotation(),

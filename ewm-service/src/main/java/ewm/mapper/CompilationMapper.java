@@ -11,7 +11,7 @@ import java.util.List;
 import static ewm.mapper.EventMapper.toEventsShortDto;
 import static java.util.stream.Collectors.toList;
 
-public class CompilationMapper {
+public final class CompilationMapper {
     public static Compilation toCompilation(NewCompilationDto dto, List<Event> events) {
         return new Compilation((events),
                 null,
