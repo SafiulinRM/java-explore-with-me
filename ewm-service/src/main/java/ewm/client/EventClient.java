@@ -17,7 +17,7 @@ import java.util.List;
 public class EventClient {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Value("stats-server.url")
+    @Value("${stats-server.url}")
     private String baseUri;
 
     public void postHit(EndpointHit endpointHit) {
@@ -26,7 +26,7 @@ public class EventClient {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         var entity = new HttpEntity<>(endpointHit, headers);
         var restTemplate = new RestTemplate();
-        restTemplate.exchange((baseUri + "/hit"),
+        restTemplate.exchange(baseUri + "/hit",
                 HttpMethod.POST,
                 entity,
                 Object.class);

@@ -49,7 +49,7 @@ public class EventService {
     private final LocationRepository locationRepository;
     private final EventClient eventClient;
 
-    @Value("ewm-service.url")
+    @Value("${ewm-service.url}")
     private String baseUri;
 
     public List<EventShortDto> getEvents(EventUserFilter filter, HttpServletRequest request) {
