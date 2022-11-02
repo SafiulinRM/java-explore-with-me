@@ -7,8 +7,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -38,21 +36,17 @@ public class EventClient {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         var entity = new HttpEntity<>(null, headers);
         String start = LocalDateTime.now().minusDays(7).format(FORMATTER);
-        start = URLEncoder.encode(start, StandardCharsets.UTF_8);
-        String end = LocalDateTime.now().format(FORMATTER);
-        end = URLEncoder.encode(end, StandardCharsets.UTF_8);
-        var urisBuilder = new StringBuilder("uris=");
-        int count = 0;
-        for (String uri : uris) {
-            count++;
-            if (count == uris.size())
-                urisBuilder.append(uri);
-            else
-                urisBuilder.append(uri).append("uris=");
+        String end = LocalDateTime.now().plusMinutes(1).format(FORMATTER);
+        var urisBuilder = new StringBuilder();
+        for (int i = 0; i < uris.size(); i++) {
+            if (i < (uris.size() - 1)) {
+                urisBuilder.append("uris").append("=").append(uris.get(i)).append("&");
+            } else {
+                urisBuilder.append("uris").append("=").append(uris.get(i));
+            }
         }
         var restTemplate = new RestTemplate();
-        return restTemplate.exchange((baseUri + "/stats?start=" + start +
-                        "&end=" + end + "&unique=true&" + urisBuilder),
+        return restTemplate.exchange(baseUri + "/stats?start=" + start + "&end=" + end + "&" + urisBuilder + "&unique=true",
                 HttpMethod.GET,
                 entity,
                 ViewStats[].class);
