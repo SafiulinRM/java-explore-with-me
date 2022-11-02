@@ -19,7 +19,6 @@ import ewm.repo.UserRepository;
 import ewm.status.EventState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,9 +48,7 @@ public class EventService {
     private final LocationRepository locationRepository;
     private final EventClient eventClient;
 
-    @Value("${ewm-service.url}")
-    private String baseUri;
-
+    @Transactional
     public List<EventShortDto> getEvents(EventUserFilter filter, HttpServletRequest request) {
         setViewsOfEvents(filter, request);
         Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
@@ -60,6 +57,7 @@ public class EventService {
         return toEventsFullDto(result);
     }
 
+    @Transactional
     public EventFullDto getEvent(Long id, HttpServletRequest request) {
         Event event = setViewOfEvent(id, request);
         return toEventFullDto(event);
@@ -312,18 +310,20 @@ public class EventService {
         eventClient.postHit(endpointHit);
     }
 
-    @Transactional
     protected void setViewsOfEvents(EventUserFilter filter, HttpServletRequest request) {
         Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
         postHit(request);
         for (Event event : events) {
-            Long views = eventClient.getStats(List.of(baseUri + "/events/" + event.getId()))
-                    .getBody()[0].getHits();
-            event.setViews(views);
+            try {
+                Long views = eventClient.getStats(List.of("/events/" + event.getId()))
+                        .getBody()[0].getHits();
+                event.setViews(views);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                event.setViews(0);
+            }
         }
     }
 
-    @Transactional
     protected Event setViewOfEvent(Long id, HttpServletRequest request) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Event not found " + id));
