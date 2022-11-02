@@ -26,8 +26,8 @@ public class StatsController {
     @GetMapping("/stats")
     public List<ViewStats> getStats(@RequestParam String start,
                                     @RequestParam String end,
-                                    @RequestParam(required = false, defaultValue = "false") Boolean unique,
-                                    @RequestParam List<String> uris) {
+                                    @RequestParam List<String> uris,
+                                    @RequestParam(required = false, defaultValue = "false") Boolean unique) {
         var stats = statsService.getStats(start, end, uris, unique);
         log.info("Статистика собрана");
         return stats;
