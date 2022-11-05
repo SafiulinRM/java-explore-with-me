@@ -7,10 +7,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Обработчик ошибок
+ */
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-
+    /**
+     * обработка EventDateException
+     *
+     * @param e {@link EventDateException}
+     * @return {@link ApiError}
+     */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleEventDateException(final EventDateException e) {
@@ -21,6 +29,12 @@ public class ErrorHandler {
                 "BAD_REQUEST");
     }
 
+    /**
+     * обработка NotFoundException
+     *
+     * @param e {@link NotFoundException}
+     * @return {@link ApiError}
+     */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(final NotFoundException e) {
@@ -32,7 +46,13 @@ public class ErrorHandler {
         );
     }
 
-    /*   @ExceptionHandler
+    /**
+     * обработка Throwable
+     *
+     * @param e {@link Throwable}
+     * @return {@link ApiError}
+     */
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleThrowable(final Throwable e) {
         log.warn("Неизвестная ошибка. " + e.getMessage());
@@ -41,8 +61,14 @@ public class ErrorHandler {
                 "Неизвестная ошибка",
                 "INTERNAL_SERVER_ERROR"
         );
-    }*/
+    }
 
+    /**
+     * обработка MethodArgumentNotValidException
+     *
+     * @param e {@link MethodArgumentNotValidException}
+     * @return {@link ApiError}
+     */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
@@ -53,9 +79,15 @@ public class ErrorHandler {
                 "BAD_REQUEST");
     }
 
+    /**
+     * обработка StateException
+     *
+     * @param e {@link StateEventException}
+     * @return {@link ApiError}
+     */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleStateException(final StateException e) {
+    public ApiError handleStateException(final StateEventException e) {
         log.warn("Не корректный статус. " + e.getMessage());
         return new ApiError(null,
                 e.getMessage(),
@@ -64,6 +96,12 @@ public class ErrorHandler {
         );
     }
 
+    /**
+     * обработка UserEventException
+     *
+     * @param e {@link UserEventException}
+     * @return {@link ApiError}
+     */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleUserEventException(final UserEventException e) {
@@ -75,6 +113,12 @@ public class ErrorHandler {
         );
     }
 
+    /**
+     * обработка RequestException
+     *
+     * @param e {@link RequestException}
+     * @return {@link ApiError}
+     */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleRequestException(final RequestException e) {
