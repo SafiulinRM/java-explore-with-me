@@ -111,9 +111,6 @@ public class Event {
     @Column
     private long views;
 
-    /**
-     * конструктор события.
-     */
     public Event(String annotation,
                  Category category,
                  String description,

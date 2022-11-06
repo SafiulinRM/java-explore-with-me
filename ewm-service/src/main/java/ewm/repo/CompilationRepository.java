@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
     /**
-     * Получение Page<Compilation> закрепленных или нет подборок событий на главной странице
+     * Получение закрепленных или нет подборок событий на главной странице
      *
      * @param pinned   закреплены или нет на главной странице
      * @param pageable {@link Pageable}

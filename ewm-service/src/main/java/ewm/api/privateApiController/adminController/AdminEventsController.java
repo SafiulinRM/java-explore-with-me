@@ -45,7 +45,7 @@ public class AdminEventsController {
      *                   текущего набора Default value : 0
      * @param size       количество событий в наборе Default value : 10
      * @param filter     параметры упаковываются в класс фильтр {@link EventAdminFilter}
-     * @return возвращает список событий {@link List}<{@link EventFullDto}>
+     * @return возвращает список событий {@link List} {@link EventFullDto}}
      */
     @GetMapping
     public List<EventFullDto> getEvents(

@@ -38,7 +38,7 @@ public class UserController {
      *             текущего набора Default value : 0
      * @param size количество элементов в наборе
      *             Default value : 10
-     * @return Возвращает список полной информации о пользователях {@link List}<{@link UserDto}
+     * @return Возвращает список полной информации о пользователях {@link List {@link UserDto}}
      */
     @GetMapping
     public List<UserDto> getUsers(@RequestParam List<Long> ids,

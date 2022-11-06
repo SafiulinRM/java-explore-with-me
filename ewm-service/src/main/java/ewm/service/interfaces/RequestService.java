@@ -22,7 +22,7 @@ public interface RequestService {
      *
      * @param userId  id инициатора события
      * @param eventId id события
-     * @param reqId
+     * @param reqId id запроса на участие
      * @return Подтвержденный запрос {@link ParticipationRequestDto}
      */
     ParticipationRequestDto confirmRequest(Long userId, Long eventId, Long reqId);

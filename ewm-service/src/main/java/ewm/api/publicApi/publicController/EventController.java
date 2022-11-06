@@ -56,7 +56,7 @@ public class EventController {
      *                      Default value : 10
      * @param filter        Класс в котором упаковываются все параметры {@link EventUserFilter}
      * @param request       Класс с информацией о запросе событий {@link HttpServletRequest}
-     * @return @return Возвращает список событий {@link List {@link EventShortDto}}
+     * @return Возвращает список событий {@link List {@link EventShortDto}}
      */
     @GetMapping
     public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
@@ -80,7 +80,7 @@ public class EventController {
      *
      * @param id      id события
      * @param request Класс с информацией о запросе события {@link HttpServletRequest}
-     * @return @return Возвращает список событий {@link EventFullDto}
+     * @return Возвращает список событий {@link EventFullDto}
      */
     @GetMapping("/{id}")
     public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest request) {

@@ -81,7 +81,7 @@ public class UserEventsController {
      *
      * @param userId      id текущего пользователя
      * @param newEventDto данные добавляемого события {@link NewEventDto}
-     * @return @return возвращает добавленное событие {@link EventFullDto}
+     * @return возвращает добавленное событие {@link EventFullDto}
      */
     @PostMapping
     public EventFullDto addEvent(@PathVariable Long userId,
@@ -112,7 +112,7 @@ public class UserEventsController {
      *
      * @param userId  id текущего пользователя
      * @param eventId id отменяемого события
-     * @return @return возвращает отмененное событие {@link EventFullDto}
+     * @return возвращает отмененное событие {@link EventFullDto}
      */
     @PatchMapping("/{eventId}")
     public EventFullDto cancelEvent(@PathVariable Long userId,
