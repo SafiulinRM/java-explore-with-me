@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ewm.mapper.CategoryMapper.toCategoryDto;
+import static ewm.mapper.CommentMapper.toCommentsDto;
 import static ewm.mapper.UserMapper.toUserShortDto;
 
 /**
@@ -103,7 +104,7 @@ public final class EventMapper {
      * @return {@link EventFullDto}
      */
     public static EventFullDto toEventFullDto(Event event) {
-        return new EventFullDto(
+        return new EventFullDto(toCommentsDto(event.getComments()),
                 event.getAnnotation(),
                 toCategoryDto(event.getCategory()),
                 event.getConfirmedRequests(),

@@ -1,13 +1,12 @@
 package ewm.model;
 
 import ewm.util.status.EventState;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Класс хранения событий.
@@ -26,6 +25,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
+    /**
+     * список комментариев.
+     */
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(
+            name = "event_comments",
+            joinColumns = {@JoinColumn(name = "event_id")},
+            inverseJoinColumns = {@JoinColumn(name = "comment_id")}
+    )
+    @ToString.Exclude
+    private List<Comment> comments = new ArrayList<>();
     /**
      * аннотация события.
      */
