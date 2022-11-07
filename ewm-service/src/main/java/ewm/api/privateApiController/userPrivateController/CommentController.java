@@ -37,7 +37,7 @@ public class CommentController {
     public CommentDto postComment(@RequestBody @Validated NewCommentDto newCommentDto,
                                   @PathVariable Long eventId) {
         var comment = commentService.postComment(newCommentDto, eventId);
-        log.info("Комментарий сохранен");
+        log.info("Комментарий события сохранен");
         return comment;
     }
 
@@ -52,7 +52,7 @@ public class CommentController {
     public CommentDto patchComment(@RequestBody @Validated UpdateCommentDto updateCommentDto,
                                    @PathVariable Long commentId) {
         var comment = commentService.patchComment(updateCommentDto, commentId);
-        log.info("Комментарий обновлен");
+        log.info("Комментарий события обновлен");
         return comment;
     }
 }
