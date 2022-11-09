@@ -2,7 +2,7 @@
 Template repository for ExploreWithMe project.
 
 ссылка на пулл реквест https://github.com/SafiulinRM/java-explore-with-me/pull/1
-# Диполмный проект![](../Downloads/Image.png)
+# Диполмный проект![This is an image](Image.png)
 # Идея
 Свободное время — ценный ресурс. Ежедневно мы планируем, как его 
 потратить — куда и с кем сходить. Сложнее всего в таком 
