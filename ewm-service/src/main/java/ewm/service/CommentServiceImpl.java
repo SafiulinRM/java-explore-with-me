@@ -48,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto postComment(NewCommentDto newCommentDto, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow();
-        if(!event.getState().equals(EventState.PUBLISHED)){
+        if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new StateEventException("Событие не опубликовано");
         }
         User commentator = userRepository.findById(newCommentDto.getCommentator()).orElseThrow();
