@@ -3,6 +3,7 @@ package ewm.service;
 import ewm.dto.comment.CommentDto;
 import ewm.dto.comment.NewCommentDto;
 import ewm.dto.comment.UpdateCommentDto;
+import ewm.exception.StateEventException;
 import ewm.model.Comment;
 import ewm.model.Event;
 import ewm.model.User;
@@ -10,6 +11,7 @@ import ewm.repo.CommentRepository;
 import ewm.repo.EventRepository;
 import ewm.repo.UserRepository;
 import ewm.service.interfaces.CommentService;
+import ewm.util.status.EventState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto postComment(NewCommentDto newCommentDto, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow();
+        if(!event.getState().equals(EventState.PUBLISHED)){
+            throw new StateEventException("Событие не опубликовано");
+        }
         User commentator = userRepository.findById(newCommentDto.getCommentator()).orElseThrow();
         Comment comment = commentRepository.save(new Comment(newCommentDto.getText(), commentator));
         event.getComments().add(comment);
