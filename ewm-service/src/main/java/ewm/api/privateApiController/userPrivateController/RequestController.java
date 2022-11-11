@@ -29,7 +29,7 @@ public class RequestController {
      * Получение информации о заявках текущего пользователя на участие в чужих событиях
      *
      * @param userId id текущего пользователя
-     * @return возвращает найденые запросы на участие {@link List {@link ParticipationRequestDto}}
+     * @return возвращает найденные запросы на участие {@link List {@link ParticipationRequestDto}}
      */
     @GetMapping
     public List<ParticipationRequestDto> getRequestsOfUser(@PathVariable Long userId) {
