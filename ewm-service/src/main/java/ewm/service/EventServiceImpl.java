@@ -35,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ewm.mapper.EventMapper.*;
 
@@ -228,13 +229,13 @@ public class EventServiceImpl implements EventService {
      * @param filter пользовательский фильтр получения событий {@link EventUserFilter}
      * @return {@link Pageable}
      */
-    private Pageable makePageable(@NonNull EventUserFilter filter) {
-        if (filter.getSort().equals("EVENT_DATE")) {
+    private Pageable makePageable(EventUserFilter filter) {
+        if (filter.getSort() == null) {
+            filter.setSort("id");
+        } else if (filter.getSort().equals("EVENT_DATE")) {
             filter.setSort("eventDate");
         } else if (filter.getSort().equals("VIEWS")) {
             filter.setSort("views");
-        } else {
-            filter.setSort("id");
         }
         Sort sort = Sort.by(Sort.Direction.DESC, filter.getSort());
         int page = filter.getFrom() / filter.getSize();
@@ -274,20 +275,24 @@ public class EventServiceImpl implements EventService {
      */
     private BooleanExpression formatExpression(@NonNull EventUserFilter filter) {
         BooleanExpression result;
-        result = QEvent.event.paid.eq(filter.getPaid());
-        if (filter.getText() != null && !Objects.equals(filter.getText(), "0")) {
-            result.and(QEvent.event.description.like(filter.getText()));
+        if (filter.getRangeEnd() != null) {
+            result = QEvent.event.eventDate.after(filter.getRangeStart());
+        } else {
+            result = QEvent.event.eventDate.after(LocalDateTime.now());
         }
-        if (filter.getCategories() != null && filter.getCategories().get(0) != 0) {
+        if (filter.getPaid() != null) {
+            result = result.and(QEvent.event.paid.eq(filter.getPaid()));
+        }
+        if (!filter.getText().isBlank() && !Objects.equals(filter.getText(), "0")) {
+            result = result.and(QEvent.event.annotation.like(filter.getText()));
+        }
+        if (!filter.getCategories().isEmpty() && filter.getCategories().get(0) != 0) {
             result = result.and(QEvent.event.category.id.in(filter.getCategories()));
-        }
-        if (filter.getRangeStart() != null) {
-            result = result.and(QEvent.event.eventDate.after(filter.getRangeStart()));
         }
         if (filter.getRangeEnd() != null) {
             result = result.and(QEvent.event.eventDate.before(filter.getRangeEnd()));
         }
-        if (filter.getOnlyAvailable().equals(true)) {
+        if (filter.isOnlyAvailable()) {
             result = result.and(QEvent.event.confirmedRequests.gt(QEvent.event.participantLimit));
         }
         return result;
@@ -300,12 +305,23 @@ public class EventServiceImpl implements EventService {
      * @return {@link BooleanExpression}
      */
     private BooleanExpression formatExpression(@NonNull EventAdminFilter filter) {
-        BooleanExpression result = QEvent.event.initiator.id.in(filter.getUsers());
+        BooleanExpression result;
+        if (filter.getRangeEnd() != null) {
+            result = QEvent.event.eventDate.after(filter.getRangeStart());
+        } else {
+            result = QEvent.event.eventDate.after(LocalDateTime.now());
+        }
         if (filter.getCategories() != null) {
             result = result.and(QEvent.event.category.id.in(filter.getCategories()));
         }
-        if (filter.getRangeStart() != null) {
-            result = result.and(QEvent.event.eventDate.after(filter.getRangeStart()));
+        if (filter.getStates() != null) {
+            List<EventState> states = filter.getStates().stream()
+                    .map(EventState::valueOf)
+                    .collect(Collectors.toList());
+            result = result.and(QEvent.event.state.in(states));
+        }
+        if (!filter.getUsers().isEmpty()) {
+            result = result.and(QEvent.event.initiator.id.in(filter.getUsers()));
         }
         if (filter.getRangeEnd() != null) {
             result = result.and(QEvent.event.eventDate.before(filter.getRangeEnd()));
