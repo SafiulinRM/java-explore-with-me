@@ -3,6 +3,7 @@ package ewm.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +27,23 @@ public class ErrorHandler {
         return new ApiError(null,
                 e.getMessage(),
                 "Не корректная дата",
+                "BAD_REQUEST");
+    }
+
+    /**
+     * обработка MissingRequestValueException
+     * исключение на пустой параметр контроллера
+     *
+     * @param e {@link EventDateException}
+     * @return {@link ApiError}
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMissingRequestValueException(final MissingRequestValueException e) {
+        log.warn("Пустой параметр. " + e.getMessage());
+        return new ApiError(null,
+                e.getMessage(),
+                "Пустой параметр",
                 "BAD_REQUEST");
     }
 
