@@ -38,7 +38,7 @@ public class EventUserFilter {
      * только события у которых не исчерпан лимит запросов на участие
      * Default value : false
      */
-    private Boolean onlyAvailable;
+    private boolean onlyAvailable;
     /**
      * Вариант сортировки: по дате события или по количеству просмотров
      * <p>
@@ -49,12 +49,12 @@ public class EventUserFilter {
      * количество событий, которые нужно пропустить для формирования текущего набора
      * Default value : 0
      */
-    private Integer from;
+    private int from;
     /**
      * количество событий в наборе
      * Default value : 10
      */
-    private Integer size;
+    private int size = 10;
     /**
      * Формат всех дат в данной программе
      */
