@@ -1,6 +1,7 @@
 package ewm.dto.event;
 
 import ewm.dto.category.CategoryDto;
+import ewm.dto.comment.CommentDto;
 import ewm.dto.user.UserShortDto;
 import ewm.model.Location;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Dto события {@link ewm.model.Event}.
@@ -20,6 +22,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventFullDto {
+    /**
+     * список комментариев события.
+     */
+    private List<CommentDto> comments;
     /**
      * аннотация события.
      */

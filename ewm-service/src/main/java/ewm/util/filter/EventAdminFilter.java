@@ -40,12 +40,12 @@ public class EventAdminFilter {
      * количество событий, которые нужно пропустить для формирования текущего набора
      * Default value : 0
      */
-    private Integer from;
+    private int from;
     /**
      * количество событий в наборе
      * Default value : 10
      */
-    private Integer size;
+    private int size = 10;
     /**
      * Формат всех дат в данной программе
      */
