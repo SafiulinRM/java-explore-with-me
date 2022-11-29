@@ -3,11 +3,17 @@ package ewm.mapper;
 import ewm.dto.event.EventFullDto;
 import ewm.dto.event.EventShortDto;
 import ewm.dto.event.NewEventDto;
-import ewm.model.*;
+import ewm.model.Category;
+import ewm.model.Event;
+import ewm.model.Location;
+import ewm.model.User;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +32,9 @@ import static ewm.mapper.UserMapper.toUserShortDto;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EventMapper {
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     /**
      * Преобразование события в shortDto
      *
@@ -59,15 +68,45 @@ public final class EventMapper {
     }
 
     /**
-     * Преобразование списка событий в fullDto
+     * Преобразование списка событий в Dto
      *
      * @param events список событий {@link List {@link Event}}
      * @return {@link List {@link EventFullDto}}
      */
-    public static List<EventFullDto> toEventsFullDto(List<Event> events) {
-        return events.stream()
-                .map(EventMapper::toEventFullDto)
-                .collect(Collectors.toList());
+    public static List<EventFullDto> toEventsFullDto(Iterable<Event> events) {
+        List<EventFullDto> eventFullDto = new ArrayList<>();
+        for (Event event : events) {
+            eventFullDto.add(toEventFullDto(event));
+        }
+        return eventFullDto;
+    }
+
+    /**
+     * Преобразование списка событий в shortDto
+     *
+     * @param events список событий {@link List {@link Event}}
+     * @return {@link List {@link EventShortDto}}
+     */
+    public static List<EventShortDto> toEventsShortDto(Iterable<Event> events) {
+        List<EventShortDto> eventsShortDto = new ArrayList<>();
+        for (Event event : events) {
+            eventsShortDto.add(toEventShortDto(event));
+        }
+        return eventsShortDto;
+    }
+
+    /**
+     * Преобразование событий в список shortDto
+     *
+     * @param events список событий {@link Long {@link Event}}
+     * @return {@link EventShortDto}
+     */
+    public static List<EventShortDto> toEventsShortDto(Page<Event> events) {
+        List<EventShortDto> eventsShortDto = new ArrayList<>();
+        for (Event event : events) {
+            eventsShortDto.add(toEventShortDto(event));
+        }
+        return eventsShortDto;
     }
 
     /**
@@ -110,7 +149,7 @@ public final class EventMapper {
                 event.getConfirmedRequests(),
                 event.getCreatedOn(),
                 event.getDescription(),
-                event.getEventDate().toString().replace('T', ' '),
+                event.getEventDate().format(FORMATTER),
                 event.getId(),
                 toUserShortDto(event.getInitiator()),
                 event.getLocation(),
