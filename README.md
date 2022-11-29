@@ -103,6 +103,8 @@ Java, Spring Boot, Lombok, JPA, Hibernate, PostgreSQL, Maven, Docker, Javadoc
 ### Условная схема взаимодействия компонентов проекта
 ![](EWM.jpg)
 
+### Покрытие тестами
+![](test_coverage.png)
 ### Порядок запуска проекта
 - **В ручном режиме:**
     - Запустить БД сервиса статистики
