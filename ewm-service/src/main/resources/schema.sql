@@ -83,29 +83,3 @@ CREATE TABLE IF NOT EXISTS event_comments
     comment_id BIGINT REFERENCES comments (id),
     CONSTRAINT uq_event_comment UNIQUE (event_id, comment_id)
 );
-
-DELETE
-FROM events_compilation;
-DELETE
-FROM  event_comments;
-DELETE
-FROM comments;
-DELETE
-FROM compilations;
-DELETE
-FROM requests;
-DELETE
-FROM events;
-DELETE
-FROM categories;
-DELETE
-FROM locations;
-DELETE
-FROM users;
-ALTER SEQUENCE comments_id_seq RESTART WITH 1;
-ALTER SEQUENCE events_id_seq RESTART WITH 1;
-ALTER SEQUENCE users_id_seq RESTART WITH 1;
-ALTER SEQUENCE locations_id_seq RESTART WITH 1;
-ALTER SEQUENCE categories_id_seq RESTART WITH 1;
-ALTER SEQUENCE requests_id_seq RESTART WITH 1;
-ALTER SEQUENCE compilations_id_seq RESTART WITH 1;
