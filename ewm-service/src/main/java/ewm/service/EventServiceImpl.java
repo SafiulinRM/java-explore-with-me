@@ -1,8 +1,6 @@
 package ewm.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import ewm.service.interfaces.EventService;
-import ewm.util.client.EventClient;
 import ewm.dto.LocationShort;
 import ewm.dto.event.*;
 import ewm.dto.stats.EndpointHit;
@@ -10,13 +8,15 @@ import ewm.exception.EventDateException;
 import ewm.exception.NotFoundException;
 import ewm.exception.StateEventException;
 import ewm.exception.UserEventException;
-import ewm.util.filter.EventAdminFilter;
-import ewm.util.filter.EventUserFilter;
 import ewm.model.*;
 import ewm.repo.CategoryRepository;
 import ewm.repo.EventRepository;
 import ewm.repo.LocationRepository;
 import ewm.repo.UserRepository;
+import ewm.service.interfaces.EventService;
+import ewm.util.client.EventClient;
+import ewm.util.filter.EventAdminFilter;
+import ewm.util.filter.EventUserFilter;
 import ewm.util.status.EventState;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -79,7 +78,7 @@ public class EventServiceImpl implements EventService {
     /**
      * Сообщение для исключения о не правильном статусе в событии
      */
-    private static final String STATE_MESSAGE = "Событие должно быть в состоянии ожидания публикациию. " +
+    private static final String STATE_MESSAGE = "Событие должно быть в состоянии ожидания публикации. " +
             "Текущий статус ";
     /**
      * Репозиторий для работы с событиями {@link EventRepository}
@@ -108,9 +107,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEvents(EventUserFilter filter, @NonNull HttpServletRequest request) {
         setViewsOfEvents(filter, request);
         Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
-        List result = new ArrayList();
-        events.forEach(result::add);
-        return toEventsFullDto(result);
+        return toEventsShortDto(events);
     }
 
     @Override
@@ -123,9 +120,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEventsOfUser(Long userId, int from, int size) {
         Page<Event> events = eventRepository.findByInitiatorId(userId, makePageable(from, size));
-        List result = new ArrayList();
-        events.forEach(result::add);
-        return toEventsShortDto(result);
+        return toEventsShortDto(events);
     }
 
     @Override
@@ -134,12 +129,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(updateEvent.getEventId())
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND + updateEvent.getEventId()));
         checkInitiatorOfEvent(userId, event.getInitiator().getId());
-        if (event.getState().equals(EventState.CANCELED) || event.getState().equals(EventState.PENDING)) {
-            toUserUpdateEvent(updateEvent, event);
-        } else {
-            throw new StateEventException("Изменить можно только отмененные события или события в состоянии ожидания модерации."
-                    + " Текущий статус: " + event.getState());
-        }
+        checkStateOfEvent(event.getState());
+        toUserUpdateEvent(updateEvent, event);
         return toEventFullDto(event);
     }
 
@@ -169,9 +160,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto cancelEvent(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND + eventId));
-        if (!event.getState().equals(EventState.PENDING)) {
-            throw new StateEventException(STATE_MESSAGE + event.getState());
-        }
+        checkStateIsPending(event.getState());
         checkInitiatorOfEvent(userId, event.getInitiator().getId());
         event.setState(EventState.CANCELED);
         return toEventFullDto(event);
@@ -180,9 +169,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEvents(@NonNull EventAdminFilter filter) {
         Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
-        List result = new ArrayList();
-        events.forEach(result::add);
-        return toEventsFullDto(result);
+        return toEventsFullDto(events);
     }
 
     @Override
@@ -203,9 +190,7 @@ public class EventServiceImpl implements EventService {
             throw new EventDateException("Дата и время на которые намечено событие не может быть раньше," +
                     " чем через 1 час от текущего момента " + event.getEventDate());
         }
-        if (!event.getState().equals(EventState.PENDING)) {
-            throw new StateEventException(STATE_MESSAGE + event.getState());
-        }
+        checkStateIsPending(event.getState());
         event.setState(EventState.PUBLISHED);
         return toEventFullDto(event);
     }
@@ -215,13 +200,11 @@ public class EventServiceImpl implements EventService {
     public EventFullDto rejectEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND + eventId));
-        if (event.getState().equals(EventState.PUBLISHED)) {
-            throw new StateEventException("Событие не должно быть опубликовано. " +
-                    "Текущий статус " + event.getState());
-        }
-        event.setState(EventState.CANCELED);
+        checkStateOfEvent(event.getState());
+        event.setState(EventState.REJECTED);
         return toEventFullDto(event);
     }
+
 
     /**
      * Настройка пагинации
@@ -275,7 +258,7 @@ public class EventServiceImpl implements EventService {
      */
     private BooleanExpression formatExpression(@NonNull EventUserFilter filter) {
         BooleanExpression result;
-        if (filter.getRangeEnd() != null) {
+        if (filter.getRangeStart() != null) {
             result = QEvent.event.eventDate.after(filter.getRangeStart());
         } else {
             result = QEvent.event.eventDate.after(LocalDateTime.now());
@@ -292,7 +275,7 @@ public class EventServiceImpl implements EventService {
         if (filter.getRangeEnd() != null) {
             result = result.and(QEvent.event.eventDate.before(filter.getRangeEnd()));
         }
-        if (filter.isOnlyAvailable()) {
+        if (filter.getOnlyAvailable()) {
             result = result.and(QEvent.event.confirmedRequests.gt(QEvent.event.participantLimit));
         }
         return result;
@@ -306,7 +289,7 @@ public class EventServiceImpl implements EventService {
      */
     private BooleanExpression formatExpression(@NonNull EventAdminFilter filter) {
         BooleanExpression result;
-        if (filter.getRangeEnd() != null) {
+        if (filter.getRangeStart() != null) {
             result = QEvent.event.eventDate.after(filter.getRangeStart());
         } else {
             result = QEvent.event.eventDate.after(LocalDateTime.now());
@@ -467,16 +450,23 @@ public class EventServiceImpl implements EventService {
         Iterable<Event> events = eventRepository.findAll(formatExpression(filter), makePageable(filter));
         postHit(request);
         for (Event event : events) {
+            Long views;
             try {
-                Long views = eventClient.getStats(List.of("/events/" + event.getId()))
+                views = eventClient.getStats(List.of("/events/" + event.getId()))
                         .getBody()[0].getHits();
-                event.setViews(views);
             } catch (ArrayIndexOutOfBoundsException e) {
-                event.setViews(0);
+                views = 0L;
             }
+            event.setViews(views);
         }
     }
 
+    /**
+     * Определение просмотров для события
+     *
+     * @param id      id пользователя
+     * @param request сведения о запросе событий {@link HttpServletRequest}
+     */
     protected Event setViewOfEvent(Long id, HttpServletRequest request) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND + id));
@@ -484,4 +474,27 @@ public class EventServiceImpl implements EventService {
         event.setViews(getStats(request));
         return event;
     }
+
+    /**
+     * Проверка, что событие не опубликовано
+     *
+     * @param state событие в котором нужно проверить состояние
+     */
+    private void checkStateOfEvent(EventState state) {
+        if (state.equals(EventState.PUBLISHED))
+            throw new StateEventException("Событие не должно быть опубликовано. " +
+                    "Текущий статус " + state);
+    }
+
+    /**
+     * Проверка, что событие не в ожидании
+     *
+     * @param state статус события, которое нужно проверить состояние
+     */
+    private void checkStateIsPending(EventState state) {
+        if (!state.equals(EventState.PENDING)) {
+            throw new StateEventException(STATE_MESSAGE + state);
+        }
+    }
+
 }
