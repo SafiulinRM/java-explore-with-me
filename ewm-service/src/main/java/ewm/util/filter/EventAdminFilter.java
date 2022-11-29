@@ -1,6 +1,7 @@
 package ewm.util.filter;
 
 import ewm.util.status.EventState;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
  * @see ewm.model.Event
  */
 @Data
+@AllArgsConstructor
 public class EventAdminFilter {
     /**
      * список id пользователей, чьи события нужно найти
@@ -40,12 +42,12 @@ public class EventAdminFilter {
      * количество событий, которые нужно пропустить для формирования текущего набора
      * Default value : 0
      */
-    private int from;
+    private Integer from = 0;
     /**
      * количество событий в наборе
      * Default value : 10
      */
-    private int size = 10;
+    private Integer size = 10;
     /**
      * Формат всех дат в данной программе
      */

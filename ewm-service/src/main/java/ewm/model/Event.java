@@ -22,6 +22,8 @@ import java.util.List;
 @Table(name = "events")
 @Getter
 @Setter
+@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {

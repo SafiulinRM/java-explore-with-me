@@ -40,6 +40,7 @@ public class CategoryController {
         List<CategoryDto> categoriesDto = categoryService.getCategories(from, size);
         log.info("Категории найдены");
         return categoriesDto;
+
     }
 
     /**

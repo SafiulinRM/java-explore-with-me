@@ -3,6 +3,7 @@ package ewm.service;
 import ewm.dto.comment.CommentDto;
 import ewm.dto.comment.NewCommentDto;
 import ewm.dto.comment.UpdateCommentDto;
+import ewm.exception.NotFoundException;
 import ewm.exception.StateEventException;
 import ewm.model.Comment;
 import ewm.model.Event;
@@ -47,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto postComment(NewCommentDto newCommentDto, Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow();
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found" + eventId));
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new StateEventException("Событие не опубликовано");
         }

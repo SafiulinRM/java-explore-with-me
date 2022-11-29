@@ -1,5 +1,6 @@
 package ewm.util.filter;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.List;
  * @see ewm.model.Event
  */
 @Data
+@AllArgsConstructor
 public class EventUserFilter {
     /**
      * текст для поиска в содержимом аннотации и подробном описании события
@@ -38,7 +40,7 @@ public class EventUserFilter {
      * только события у которых не исчерпан лимит запросов на участие
      * Default value : false
      */
-    private boolean onlyAvailable;
+    private Boolean onlyAvailable;
     /**
      * Вариант сортировки: по дате события или по количеству просмотров
      * <p>
@@ -49,12 +51,12 @@ public class EventUserFilter {
      * количество событий, которые нужно пропустить для формирования текущего набора
      * Default value : 0
      */
-    private int from;
+    private Integer from = 0;
     /**
      * количество событий в наборе
      * Default value : 10
      */
-    private int size = 10;
+    private Integer size = 10;
     /**
      * Формат всех дат в данной программе
      */

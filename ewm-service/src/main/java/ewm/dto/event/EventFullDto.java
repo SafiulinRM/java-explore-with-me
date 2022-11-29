@@ -1,5 +1,6 @@
 package ewm.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import ewm.dto.category.CategoryDto;
 import ewm.dto.comment.CommentDto;
 import ewm.dto.user.UserShortDto;
@@ -44,6 +45,7 @@ public class EventFullDto {
      * время создания события.
      */
     @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdOn;
     /**
      * описание события.

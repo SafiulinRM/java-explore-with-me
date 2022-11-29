@@ -54,8 +54,8 @@ public class AdminEventsController {
             @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
-            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(required = false, defaultValue = "10") Integer size,
             EventAdminFilter filter) {
         var events = eventService.getEvents(filter);
         log.info("События найдены");

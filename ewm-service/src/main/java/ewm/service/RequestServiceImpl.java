@@ -117,23 +117,19 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND + userId));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND + eventId));
-        validationRequest(requester, event);
+        validationRequest(requester.getId(), event);
         Request saveRequest = requestRepository.save(new Request(event, requester));
-        Request request = requestRepository.findById(saveRequest.getId())
-                .orElseThrow(() -> new NotFoundException(REQUEST_NOT_FOUND + saveRequest.getId()));
-        if (event.getRequestModeration().equals(false)) {
-            request.setStatus(RequestStatus.CONFIRMED);
-        }
+        Request request = confirmRequest(saveRequest.getId(), event.getRequestModeration());
         return toParticipationRequestDto(request);
     }
 
     @Override
     @Transactional
-    public ParticipationRequestDto cancelRequest(long userId, long requestId) {
+    public ParticipationRequestDto cancelRequest(long requesterId, long requestId) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException(REQUEST_NOT_FOUND + requestId));
-        if (userId != request.getRequester().getId()) {
-            throw new RequestException("User " + userId + " not initiator of request " + requestId);
+        if (requesterId != request.getRequester().getId()) {
+            throw new RequestException("User " + requesterId + " not initiator of request " + requestId);
         }
         request.setStatus(RequestStatus.CANCELED);
         return toParticipationRequestDto(request);
@@ -152,17 +148,17 @@ public class RequestServiceImpl implements RequestService {
     }
 
     /**
-     * Валидация запроса
+     * Валидация создания запроса
      *
-     * @param requester пользователь, который собирается участвовать {@link User}
-     * @param event     событие {@link Event}
+     * @param requesterId id пользователя, который собирается участвовать {@link User}
+     * @param event       событие {@link Event}
      */
-    private void validationRequest(@NonNull User requester, @NonNull Event event) {
-        Request request = requestRepository.findByRequesterIdAndEventId(requester.getId(), event.getId());
+    private void validationRequest(@NonNull Long requesterId, @NonNull Event event) {
+        Request request = requestRepository.findByRequesterIdAndEventId(requesterId, event.getId());
         if (request != null) {
             throw new RequestException("Такой запрос уже существует");
         }
-        if (requester.getId() == event.getInitiator().getId()) {
+        if (requesterId == event.getInitiator().getId()) {
             throw new RequestException("Инициатор события не может добавить запрос на участие в своём событии");
         }
         if (!event.getState().equals(EventState.PUBLISHED)) {
@@ -198,5 +194,21 @@ public class RequestServiceImpl implements RequestService {
         for (Request req : requests) {
             req.setStatus(RequestStatus.REJECTED);
         }
+    }
+
+    /**
+     * Автоматическое подтверждение запроса, если отключена премодерация у события
+     *
+     * @param requestId           id запроса на участие в событии
+     * @param isRequestModeration включена/выключена премодерация запросов
+     * @return request возможно подтвержденный запрос {@link Request}
+     */
+    private Request confirmRequest(Long requestId, Boolean isRequestModeration) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException(REQUEST_NOT_FOUND + requestId));
+        if (!isRequestModeration) {
+            request.setStatus(RequestStatus.CONFIRMED);
+        }
+        return request;
     }
 }
