@@ -22,7 +22,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class Category {
     /**
-     * id категории.
+     * id категории..
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
